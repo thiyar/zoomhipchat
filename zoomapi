@@ -1,0 +1,43 @@
+// call the packages we need
+var express    = require('express');
+var app        = express();
+var request = require('request');
+var syncrequest = require('sync-request');
+
+var port = process.env.PORT || 8080;
+
+// ROUTES FOR OUR API
+var router = express.Router();
+
+// Query values for Zoom REST call
+var api_key = "KuqoKDxjQT2dtdb9Yis47A";
+var api_secret = "ZvETJs0EYOoZWaCCjFXWdipJO5yZIiRYC4CF";
+var host_id = "LeE4XRa8RkaCxtqgXts3Zw";
+var topic = "Hip Chat Meet";
+var type = 1;   // type = 1, instant meeting
+
+var options = {
+        qs: {api_key: api_key, api_secret: api_secret, host_id: host_id, topic: topic, type: type},
+};
+
+router.post('/', function(req, res) {
+     console.log("post ...");
+
+     // make a synchronous request to zoom to create a meeting
+     var syncres = syncrequest('POST',"https://api.zoom.us/v1/meeting/create",options);
+     var response=JSON.parse(syncres.getBody('utf8'));
+     retvalue = 'Join my Zoom conference ' + response.join_url;
+     //test = 'zoommtg://zoom.us/join?confno=835521683'
+
+     console.log(retvalue);
+
+     res.json({ message: retvalue, message_format:"text"});
+});
+
+// REGISTER OUR ROUTES
+// all of our routes will be prefixed with /api
+app.use('/api', router);
+
+// START THE SERVER
+app.listen(port);
+console.log('Listening on port ' + port);
